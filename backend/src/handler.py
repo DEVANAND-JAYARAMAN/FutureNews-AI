@@ -395,6 +395,11 @@ def lambda_handler(
 
     path = get_request_path(event)
 
+    if path.startswith("/prod/"):
+        path = path[len("/prod"):]
+    elif path == "/prod":
+        path = "/"
+
     if path == "/latest":
         return get_latest_edition_route()
 
