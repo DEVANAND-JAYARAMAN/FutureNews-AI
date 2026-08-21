@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from utils.helpers import convert_decimals
+
 
 def load_world_memory(world_state: dict) -> dict:
     """
@@ -26,7 +28,7 @@ def build_memory_context(
     Build the structured memory context sent to the agent.
     """
 
-    return {
+    return convert_decimals({
         "currentFutureDate": world_state.get(
             "currentFutureDate"
         ),
@@ -51,7 +53,7 @@ def build_memory_context(
             0
         ),
         "recentEditions": recent_editions
-    }
+    })
 
 
 def update_world_memory(

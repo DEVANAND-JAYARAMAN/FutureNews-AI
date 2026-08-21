@@ -60,6 +60,36 @@ def get_all_editions() -> list[dict]:
     return editions
 
 
+def get_edition_by_id(
+    edition_id: str
+) -> dict | None:
+    """
+    Load a single FutureNews edition by its editionId.
+    """
+
+    response = editions_table.get_item(
+        Key={
+            "editionId": edition_id
+        }
+    )
+
+    return response.get("Item")
+
+
+def get_latest_edition() -> dict | None:
+    """
+    Return the most recently generated edition,
+    based on editionNumber.
+    """
+
+    editions = get_all_editions()
+
+    if not editions:
+        return None
+
+    return editions[-1]
+
+
 def save_edition(
     edition: dict
 ) -> None:
