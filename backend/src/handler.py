@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from decimal import Decimal
 
 from agent.future_news_agent import (
     run_future_news_agent
@@ -12,9 +13,98 @@ from agent.memory import (
 from services.dynamodb_service import (
     get_world_state,
     get_all_editions,
+    get_latest_edition,
+    get_edition_by_id,
     save_edition,
     update_world_state
 )
+
+
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
+}
+
+
+def decimal_serializer(value):
+    """
+    JSON default= hook for values json.dumps can't
+    natively handle, notably the Decimal objects
+    DynamoDB returns for all numeric attributes.
+
+    Integral Decimals (e.g. Decimal("182")) become int,
+    non-integral Decimals become float.
+    """
+
+    if isinstance(value, Decimal):
+        if value % 1 == 0:
+            return int(value)
+        return float(value)
+
+    return str(value)
+
+
+def response(
+    status_code: int,
+    body: dict
+) -> dict:
+    """
+    Build an API Gateway HTTP API response
+    with CORS headers attached.
+    """
+
+    return {
+        "statusCode": status_code,
+        "headers": CORS_HEADERS,
+        "body": json.dumps(
+            body,
+            default=decimal_serializer
+        )
+    }
+
+
+def get_request_path(event: dict) -> str:
+    """
+    Resolve the request path from an API Gateway
+    HTTP API (payload format 2.0) event, with fallbacks
+    for other event shapes.
+    """
+
+    request_context = event.get(
+        "requestContext",
+        {}
+    )
+
+    http_context = request_context.get(
+        "http",
+        {}
+    )
+
+    return (
+        http_context.get("path")
+        or event.get("rawPath")
+        or event.get("path")
+        or ""
+    )
+
+
+def get_request_method(event: dict) -> str:
+    request_context = event.get(
+        "requestContext",
+        {}
+    )
+
+    http_context = request_context.get(
+        "http",
+        {}
+    )
+
+    return (
+        http_context.get("method")
+        or event.get("httpMethod")
+        or "GET"
+    )
 
 
 def create_edition(
@@ -69,18 +159,92 @@ def create_edition(
     }
 
 
-def lambda_handler(
-    event,
-    context
-):
+def get_latest_edition_route() -> dict:
     """
-    Main entry point for FutureNews AI.
+    GET /latest
 
-    Flow:
+    Never calls Bedrock. Reads the latest edition
+    straight from DynamoDB.
+    """
 
+    try:
+        edition = get_latest_edition()
+    except Exception as error:
+        return response(
+            500,
+            {"error": str(error)}
+        )
+
+    if not edition:
+        return response(
+            404,
+            {"error": "No editions found."}
+        )
+
+    return response(
+        200,
+        edition
+    )
+
+
+def get_all_editions_route() -> dict:
+    """
+    GET /editions
+
+    Never calls Bedrock. Reads every edition
+    straight from DynamoDB.
+    """
+
+    try:
+        editions = get_all_editions()
+    except Exception as error:
+        return response(
+            500,
+            {"error": str(error)}
+        )
+
+    return response(
+        200,
+        {"editions": editions}
+    )
+
+
+def get_edition_by_id_route(edition_id: str) -> dict:
+    """
+    GET /editions/{editionId}
+
+    Never calls Bedrock. Reads a single edition
+    straight from DynamoDB.
+    """
+
+    try:
+        edition = get_edition_by_id(edition_id)
+    except Exception as error:
+        return response(
+            500,
+            {"error": str(error)}
+        )
+
+    if not edition:
+        return response(
+            404,
+            {"error": f"Edition '{edition_id}' not found."}
+        )
+
+    return response(
+        200,
+        edition
+    )
+
+
+def generate_future_news() -> dict:
+    """
+    GET /generate
+
+    The ONLY route allowed to:
     1. Load persistent world memory
     2. Load previous editions
-    3. Run autonomous FutureNews agent
+    3. Run autonomous FutureNews agent (calls Bedrock)
     4. Create a full newspaper edition
     5. Update persistent world memory
     6. Save edition and memory
@@ -95,16 +259,14 @@ def lambda_handler(
         world_state = get_world_state()
 
         if not world_state:
-            return {
-                "statusCode": 404,
-                "body": json.dumps(
-                    {
-                        "error": (
-                            "World state not found."
-                        )
-                    }
-                )
-            }
+            return response(
+                404,
+                {
+                    "error": (
+                        "World state not found."
+                    )
+                }
+            )
 
         editions = get_all_editions()
 
@@ -126,9 +288,11 @@ def lambda_handler(
         # -----------------------------
 
         next_edition_number = (
-            world_state.get(
-                "totalEditions",
-                0
+            int(
+                world_state.get(
+                    "totalEditions",
+                    0
+                )
             )
             + 1
         )
@@ -184,44 +348,82 @@ def lambda_handler(
         # STEP 6: RETURN RESULT
         # -----------------------------
 
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "message": (
-                        "FutureNews edition "
-                        "generated successfully."
-                    ),
-                    "edition": edition,
-                    "agentReview": agent_result[
-                        "review"
-                    ],
-                    "dateValidation": agent_result[
-                        "dateValidation"
-                    ],
-                    "wasRevised": agent_result[
-                        "wasRevised"
-                    ]
-                },
-                default=str
-            )
-        }
+        return response(
+            200,
+            {
+                "message": (
+                    "FutureNews edition "
+                    "generated successfully."
+                ),
+                "edition": edition,
+                "agentReview": agent_result[
+                    "review"
+                ],
+                "dateValidation": agent_result[
+                    "dateValidation"
+                ],
+                "wasRevised": agent_result[
+                    "wasRevised"
+                ]
+            }
+        )
 
     except Exception as error:
 
-        return {
-            "statusCode": 500,
-            "body": json.dumps(
-                {
-                    "error": str(error)
-                }
-            )
-        }
+        return response(
+            500,
+            {"error": str(error)}
+        )
+
+
+def lambda_handler(
+    event,
+    context
+):
+    """
+    Main entry point for FutureNews AI.
+
+    Routes each API Gateway HTTP API request to the
+    correct handler based on its path. Only GET /generate
+    is allowed to invoke Amazon Bedrock / the agent.
+    """
+
+    method = get_request_method(event)
+
+    if method == "OPTIONS":
+        return response(200, {})
+
+    path = get_request_path(event)
+
+    if path == "/latest":
+        return get_latest_edition_route()
+
+    if path == "/editions":
+        return get_all_editions_route()
+
+    if path.startswith("/editions/"):
+        edition_id = path[len("/editions/"):].strip("/")
+        return get_edition_by_id_route(edition_id)
+
+    if path == "/generate":
+        return generate_future_news()
+
+    return response(
+        404,
+        {"error": f"No route found for '{path}'."}
+    )
 
 
 if __name__ == "__main__":
     result = lambda_handler(
-        {},
+        {
+            "requestContext": {
+                "http": {
+                    "method": "GET",
+                    "path": "/generate"
+                }
+            }
+        },
         None
     )
 
