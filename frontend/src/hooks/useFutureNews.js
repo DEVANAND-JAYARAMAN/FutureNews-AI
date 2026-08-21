@@ -42,8 +42,7 @@ export function useFutureNews() {
     setEditionsError(null);
     try {
       const data = await getAllEditions();
-      const list = Array.isArray(data) ? data : data?.editions || [];
-      setEditions(sortEditions(list));
+      setEditions(sortEditions(data));
     } catch (err) {
       setEditionsError(err.message);
     } finally {
