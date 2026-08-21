@@ -1,383 +1,857 @@
 # 📰 FutureNews AI
 
-### An autonomous newspaper from an alternate future — powered by AWS and Amazon Bedrock.
+> ### *Tomorrow's headlines, written before they happen.*
 
-> **Tomorrow's headlines, written before they happen.**
+**FutureNews AI** is an autonomous AI-powered newspaper that generates fictional news from the future.
 
-FutureNews AI is an autonomous AI-powered news agency that creates a new edition of a fictional newspaper set in the future.
+Unlike a traditional content generator, FutureNews AI maintains a persistent memory of a fictional world. Every new edition analyzes previous events, world state, and ongoing storylines before deciding what happens next.
 
-Unlike a simple AI content generator, FutureNews AI maintains a **persistent fictional world**. The AI agent remembers previous events, analyzes how the world has evolved, and generates the next logical chapter in the story.
-
-Every edition contributes to an evolving timeline.
+The result is an evolving fictional timeline where one event influences the next.
 
 ---
 
-## 🌍 The Concept
+# 🚀 Live Architecture
 
-Imagine opening a newspaper from the future.
-
-One day, you might read:
-
-> **India launches its first fully autonomous AI-managed city.**
-
-A few editions later:
-
-> **Aethera Core faces its first major infrastructure crisis.**
-
-Then:
-
-> **Government launches an investigation into autonomous city governance.**
-
-FutureNews AI connects these events into a continuously evolving fictional universe.
-
-The goal is to create:
-
-> **"A newspaper from an alternate future that writes itself every day."**
+```text
+                        ┌─────────────────────┐
+                        │   React + Vite      │
+                        │    Frontend UI      │
+                        └──────────┬──────────┘
+                                   │
+                                   ▼
+                        ┌─────────────────────┐
+                        │    AWS Amplify      │
+                        │ Frontend Hosting    │
+                        └──────────┬──────────┘
+                                   │
+                                   ▼
+                        ┌─────────────────────┐
+                        │  Amazon API Gateway │
+                        │     REST API        │
+                        └──────────┬──────────┘
+                                   │
+                                   ▼
+                        ┌─────────────────────┐
+                        │    AWS Lambda       │
+                        │  FutureNews Agent   │
+                        └──────────┬──────────┘
+                                   │
+                  ┌────────────────┼────────────────┐
+                  │                │                │
+                  ▼                ▼                ▼
+        ┌─────────────────┐ ┌──────────────┐ ┌─────────────────┐
+        │ Amazon DynamoDB │ │ Amazon       │ │ Amazon          │
+        │ World Memory    │ │ Bedrock      │ │ EventBridge     │
+        │ Editions        │ │ Nova Lite    │ │ Scheduler       │
+        └─────────────────┘ └──────────────┘ └─────────────────┘
+```
 
 ---
 
-# 🤖 Autonomous Agent Workflow
+# 🤖 How FutureNews AI Works
 
-FutureNews AI is designed as an autonomous agent rather than a one-time content generator.
+FutureNews AI operates as an autonomous agent.
 
-The workflow is:
+The agent does not simply generate random news articles.
+
+Instead, it follows a structured workflow.
 
 ```text
 EventBridge Scheduler
         │
         ▼
-FutureNews AI Agent
+AWS Lambda wakes up
         │
         ▼
-Load Persistent World Memory
+Load World Memory
         │
-        ▼
-Analyze Previous Events
+        ├── Previous editions
+        ├── World facts
+        ├── Ongoing storylines
+        └── Previous consequences
         │
         ▼
 Generate Next Future Event
         │
         ▼
-Self Review & Validation
-        │
-        ├── Is the story consistent?
-        ├── Is it creative?
-        ├── Does it avoid repetition?
-        └── Does it create future possibilities?
+Amazon Bedrock
         │
         ▼
-Revise if Necessary
+Amazon Nova Lite
         │
         ▼
-Generate Final Newspaper Edition
+AI Self Review
+        │
+        ├── Check timeline consistency
+        ├── Check duplicate events
+        ├── Check logical progression
+        └── Review future plausibility
         │
         ▼
-Store in DynamoDB
+Save New Edition
+        │
+        ├── DynamoDB Editions
+        └── Update World State
         │
         ▼
-The Future World Evolves
+Next Edition
 ```
 
-No human needs to open the app for this to happen — a scheduled EventBridge trigger wakes
-the Lambda agent on its own cadence and the world keeps advancing in the background.
+Each edition becomes part of the memory used to generate the next event.
 
 ---
 
-## 🧠 Persistent Agent Memory
+# 🧠 Persistent World Memory
 
-The core idea behind FutureNews AI is persistent memory.
+The core idea behind FutureNews AI is **persistent memory**.
 
-The AI agent does not generate every story independently.
+The system stores information about the fictional world inside Amazon DynamoDB.
 
-Before creating a new edition, it considers:
+Example:
 
-- Previous news events
-- Current world state
-- Active storylines
-- Important facts introduced in earlier editions
-- Possible future developments
-- Recent headlines
-
-This allows the fictional world to evolve over time.
-
-For example:
-
-```
+```text
 Edition 1
-│
-├── India launches Aethera,
-│   its first fully autonomous AI-managed city.
-│
+    │
+    ▼
+AI-powered autonomous city introduced
+    │
+    ▼
 Edition 2
-│
-├── Aethera Core makes a controversial
-│   autonomous emergency decision.
-│
+    │
+    ▼
+New AI transportation infrastructure
+    │
+    ▼
 Edition 3
-│
-├── Legal and ethical debates emerge
-│   around AI authority.
-│
+    │
+    ▼
+Security concerns emerge
+    │
+    ▼
 Edition 4
-│
-├── A major cybersecurity incident
-│   disrupts the AI-managed city.
-│
-Edition 5+
-│
-└── The consequences continue to evolve.
+    │
+    ▼
+Global regulations are introduced
+    │
+    ▼
+Edition 5
+    │
+    ▼
+Technology evolves further
 ```
 
-Each new event becomes part of the memory used to generate future events.
+This allows the fictional world to evolve instead of generating unrelated news articles.
 
 ---
 
-## ☁️ AWS Architecture
+# ✨ Features
 
-```
-                         ┌─────────────────────┐
-                         │ EventBridge         │
-                         │ Scheduler           │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ AWS Lambda          │
-                         │ FutureNews Agent    │
-                         └──────────┬──────────┘
-                                    │
-                  ┌─────────────────┼─────────────────┐
-                  │                 │                 │
-                  ▼                 ▼                 ▼
-          ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-          │ Amazon       │  │ Amazon       │  │ Amazon       │
-          │ Bedrock      │  │ DynamoDB     │  │ API Gateway  │
-          │              │  │              │  │              │
-          │ AI Generation│  │ World Memory │  │ Frontend API │
-          └──────────────┘  │ News Archive │  └──────┬───────┘
-                            └──────────────┘         │
-                                                     ▼
-                                            ┌─────────────────┐
-                                            │ React + Vite    │
-                                            │ FutureNews UI   │
-                                            └─────────────────┘
-```
+- 🤖 Autonomous AI news generation
+- 🧠 Persistent fictional world memory
+- 📰 AI-generated future news editions
+- 🔄 Storyline continuity
+- 🧠 Previous event awareness
+- 🔍 AI self-review
+- 📅 Future timeline generation
+- 📚 Complete edition archive
+- ⚡ Serverless AWS architecture
+- 🌐 Public REST API
+- 🚀 Automated frontend deployment
+- ⏰ Scheduled autonomous execution
 
 ---
 
-## 🛠️ Technologies Used
+# 🛠️ Technology Stack
 
-**Frontend**
+## Frontend
+
 - React
 - Vite
 - JavaScript
 - CSS
-
-**AWS**
-- Amazon EventBridge Scheduler
-- AWS Lambda
-- Amazon Bedrock
-- Amazon DynamoDB
-- Amazon API Gateway
 - AWS Amplify
+
+## Backend
+
+- Python
+- AWS Lambda
+- Amazon API Gateway
+
+## AI
+
+- Amazon Bedrock
+- Amazon Nova Lite
+- Bedrock Converse API
+
+## Database
+
+- Amazon DynamoDB
+
+## Automation
+
+- Amazon EventBridge Scheduler
 
 ---
 
-## ⚙️ How It Works
+# ☁️ AWS Services Used
 
-### 1. The Agent Wakes Up
+| AWS Service | Purpose |
+|---|---|
+| AWS Amplify | Hosts and deploys the React frontend |
+| Amazon API Gateway | Exposes the FutureNews REST API |
+| AWS Lambda | Runs the FutureNews AI agent |
+| Amazon Bedrock | Provides generative AI capabilities |
+| Amazon Nova Lite | Generates future events and articles |
+| Amazon DynamoDB | Stores editions and persistent world memory |
+| Amazon EventBridge Scheduler | Triggers autonomous agent execution |
+| AWS IAM | Manages permissions between AWS services |
+| Amazon CloudWatch | Lambda monitoring and logs |
 
-Amazon EventBridge Scheduler automatically triggers the FutureNews AI agent.
+---
 
-The user does not need to open the application.
+# 🔌 API Endpoints
 
-### 2. The Agent Reads Its Memory
+The backend exposes the following API routes.
 
-The Lambda function retrieves:
+## Get Latest Edition
 
-- Current fictional world state
-- Previous FutureNews editions
-- Active storylines
-- Important facts
+```http
+GET /latest
+```
 
-from Amazon DynamoDB.
+Returns the most recent FutureNews edition.
 
-### 3. The AI Generates the Next Event
+Example:
 
-Amazon Bedrock is used to generate a new event that logically continues the fictional world.
+```json
+{
+  "editionNumber": 1,
+  "editionId": "edition-001",
+  "futureDate": "2047-01-15",
+  "headline": "The First AI-Managed City Begins a New Era",
+  "category": "Technology",
+  "breakingSummary": "A major technological event changes the future...",
+  "article": "Full AI-generated article..."
+}
+```
 
-The agent is instructed to avoid simply repeating previous stories.
+---
 
-### 4. The Agent Reviews Its Own Work
+## Get All Editions
 
-A self-review step evaluates the generated event.
+```http
+GET /editions
+```
 
-The agent checks:
+Returns all generated FutureNews editions.
 
-- Story consistency
-- Creativity
-- Repetition
-- Timeline consistency
-- Future storytelling potential
+This endpoint only reads data from DynamoDB.
 
-If problems are detected, the content can be revised.
+It does **not** trigger AI generation.
 
-### 5. The New Edition Is Stored
+---
 
-The final edition is saved to DynamoDB.
+## Get Edition by ID
+
+```http
+GET /editions/{editionId}
+```
+
+Example:
+
+```http
+GET /editions/edition-001
+```
+
+Returns a specific edition.
+
+---
+
+## Generate Next Future Edition
+
+```http
+GET /generate
+```
+
+This endpoint triggers the FutureNews AI agent.
+
+The workflow:
+
+```text
+/generate
+    │
+    ▼
+Load World Memory
+    │
+    ▼
+Load Previous Editions
+    │
+    ▼
+Generate Future Event
+    │
+    ▼
+AI Review
+    │
+    ▼
+Save Edition
+    │
+    ▼
+Update World State
+```
+
+Only this route calls Amazon Bedrock.
+
+The read-only endpoints:
+
+```text
+/latest
+/editions
+/editions/{id}
+```
+
+only interact with DynamoDB.
+
+---
+
+# 🧩 Agent Architecture
+
+The FutureNews agent is composed of multiple logical components.
+
+```text
+FutureNews Agent
+│
+├── Memory System
+│     ├── Load World State
+│     └── Load Previous Editions
+│
+├── Generator
+│     └── Generate Future Event
+│
+├── Reviewer
+│     ├── Check consistency
+│     ├── Detect repetition
+│     └── Evaluate plausibility
+│
+├── Date Validator
+│     └── Ensure chronological progression
+│
+└── Persistence Layer
+      ├── Save Edition
+      └── Update World State
+```
+
+---
+
+# 🔄 Agent Generation Workflow
+
+When the agent generates a new edition:
+
+### 1. Load World Memory
+
+The agent loads:
+
+- Previous editions
+- Current world state
+- Important historical events
+- Ongoing storylines
+
+---
+
+### 2. Generate a Future Event
+
+Amazon Nova Lite generates a new event based on the existing fictional world.
+
+The event includes:
+
+```text
+Headline
+Category
+Future Date
+Breaking Summary
+Full Article
+Background Context
+Related Events
+New Facts
+Possible Future Developments
+```
+
+---
+
+### 3. AI Self Review
+
+The generated event is reviewed.
+
+The reviewer checks:
+
+- Does the event logically follow previous events?
+- Does it repeat an earlier event?
+- Does it introduce a meaningful development?
+- Does the future date progress correctly?
+- Does it fit the fictional world?
+
+Example response:
+
+```json
+{
+  "approved": true,
+  "score": 9,
+  "issues": [],
+  "feedback": "The event is consistent with the established world."
+}
+```
+
+---
+
+### 4. Save the Edition
+
+Once approved, the edition is stored in DynamoDB.
+
+Example:
+
+```text
+edition-001
+edition-002
+edition-003
+edition-004
+...
+```
+
+---
+
+### 5. Update World State
+
+The global world memory is updated.
+
+The next generation will use the newly created edition as part of its context.
+
+---
+
+# 🗄️ DynamoDB Data Model
+
+## Editions
 
 Each edition contains information such as:
 
 ```json
 {
-  "editionId": "edition-010",
-  "editionNumber": 10,
-  "futureDate": "2048-05-20",
-  "headline": "Aethera Achieves Milestone in Quantum AI Scalability",
-  "category": "Technology Breakthrough",
-  "breakingSummary": "A new breakthrough changes the future of autonomous cities.",
-  "article": "Full AI-generated newspaper article...",
-  "backgroundContext": "Context from previous events...",
+  "editionId": "edition-001",
+  "editionNumber": 1,
+  "futureDate": "2047-01-15",
+  "headline": "Future Event Headline",
+  "category": "Technology",
+  "breakingSummary": "Short summary",
+  "article": "Full generated article",
+  "backgroundContext": "Context from the fictional world",
+  "relatedEvents": [],
   "newFacts": [],
-  "possibleFutureDevelopments": []
+  "possibleFutureDevelopments": [],
+  "createdAt": "2026-08-21T00:00:00Z"
 }
 ```
 
-The next generation cycle can then use this information as part of its persistent memory.
-
 ---
 
-## 📰 Features
+## World State
 
-- 🤖 Autonomous AI news generation
-- 🧠 Persistent fictional world memory
-- 🔄 Self-review and revision loop
-- 📰 AI-generated future newspaper editions
-- 🌍 Evolving storylines
-- ⏳ Future event timeline
-- 📚 Previous editions archive
-- ⚡ On-demand edition generation
-- ☁️ Fully serverless AWS architecture
+The world state stores persistent information about the fictional universe.
 
----
+Example:
 
-## 🔌 API
-
-The backend exposes API endpoints through Amazon API Gateway.
-
-```
-GET /generate
-GET /latest
-GET /editions
-GET /editions/{editionId}
+```json
+{
+  "worldId": "global",
+  "totalEditions": 10,
+  "currentFutureDate": "2050-04-18",
+  "worldFacts": [],
+  "activeStorylines": []
+}
 ```
 
-**Base URL:** `https://92iqdbkjtd.execute-api.ap-south-1.amazonaws.com/prod`
-
-### Generate
-
-`GET /generate`
-
-Triggers the FutureNews AI agent and creates a new edition.
-
-### Latest Edition
-
-`GET /latest`
-
-Returns the latest available FutureNews edition.
-
-### Archive
-
-`GET /editions`
-
-Returns previous editions.
-
-### Specific Edition
-
-`GET /editions/{editionId}`
-
-Returns a specific edition.
-
-> ⚠️ **Current limitation:** `/latest`, `/editions`, and `/editions/{editionId}` are
-> intended to be read-only, but in the live deployment they currently trigger the same
-> generation pipeline as `/generate` — each call creates a new edition instead of reading
-> existing data. See [Known Issues](#-known-issues) below.
-
 ---
 
-## 🖥️ Frontend
+# 🌐 Frontend
 
-The FutureNews AI interface is designed as a futuristic digital newspaper.
+The frontend is built using React and Vite.
 
-Users can:
+The application contains:
 
-- Read the latest edition
-- Browse previous editions
-- Explore the future timeline
-- View the evolving fictional world
-- Learn how the autonomous agent works
-- Generate the next edition manually
-
-The design combines:
-
-**Futuristic technology × Digital newspaper × AI storytelling**
-
-The frontend is built with React + Vite and talks to the API exclusively through
-`frontend/src/services/futureNewsApi.js`, which reads the API base URL from
-`VITE_API_BASE_URL` — nothing is hardcoded. `GET /generate` is only ever called when
-the user clicks **Generate Next Future**, never automatically on page load.
-
-See [`frontend/README.md`](frontend/README.md) for the component-level breakdown.
-
----
-
-## 📁 Project Structure
-
-```
-FutureNews-AI
+```text
+FutureNews AI
 │
-├── backend
-│   ├── src
-│   │   ├── handler.py
-│   │   ├── agent
-│   │   │   ├── future_news_agent.py
-│   │   │   ├── generator.py
-│   │   │   ├── memory.py
-│   │   │   └── reviewer.py
-│   │   ├── prompts
-│   │   └── services
-│   │       ├── bedrock_service.py
-│   │       └── dynamodb_service.py
+├── Latest Edition
+│
+├── Future Timeline
+│
+├── Edition Archive
+│
+├── Generate Next Future
+│
+├── Agent Workflow
+│
+├── Technology Stack
+│
+└── About the Agent
+```
+
+The frontend communicates with the API Gateway backend using:
+
+```text
+VITE_API_BASE_URL
+```
+
+Example:
+
+```env
+VITE_API_BASE_URL=https://YOUR_API_ID.execute-api.REGION.amazonaws.com/prod
+```
+
+---
+
+# 🚀 Deployment Architecture
+
+## Frontend
+
+```text
+GitHub
+   │
+   ▼
+AWS Amplify
+   │
+   ▼
+Build React Application
+   │
+   ▼
+Deploy
+   │
+   ▼
+Live Website
+```
+
+Every push to the connected repository can trigger a new frontend deployment.
+
+---
+
+## Backend
+
+```text
+Python Source Code
+        │
+        ▼
+Lambda Deployment Package
+        │
+        ▼
+agent.zip
+        │
+        ▼
+AWS Lambda
+        │
+        ▼
+API Gateway
+```
+
+The Lambda deployment package must contain:
+
+```text
+handler.py
+agent/
+services/
+prompts/
+utils/
+```
+
+at the ZIP root.
+
+---
+
+# 🧪 Important Engineering Challenges Solved
+
+Building FutureNews AI involved solving several real-world serverless and AI integration issues.
+
+---
+
+## 1. API Routes Were Accidentally Triggering Generation
+
+Initially:
+
+```text
+/latest
+/editions
+```
+
+were incorrectly invoking the same Lambda generation logic as:
+
+```text
+/generate
+```
+
+This caused new AI-generated editions to be created simply by loading the frontend.
+
+### Solution
+
+Explicit route dispatch was implemented.
+
+```text
+/latest
+    ↓
+DynamoDB only
+
+/editions
+    ↓
+DynamoDB only
+
+/editions/{id}
+    ↓
+DynamoDB only
+
+/generate
+    ↓
+FutureNews AI Agent
+    ↓
+Amazon Bedrock
+```
+
+---
+
+## 2. DynamoDB Decimal Serialization
+
+DynamoDB returns numeric values as Python `Decimal` objects.
+
+This caused errors such as:
+
+```text
+Object of type Decimal is not JSON serializable
+```
+
+The issue occurred both:
+
+- When returning API responses
+- Inside the AI generation pipeline when using `json.dumps()`
+
+### Solution
+
+A recursive Decimal conversion utility was implemented.
+
+```text
+Decimal
+   ↓
+int / float
+   ↓
+JSON-safe Python objects
+```
+
+The conversion is applied when DynamoDB data enters the agent memory pipeline.
+
+---
+
+## 3. Edition Number Formatting
+
+The edition number was retrieved from DynamoDB and could be returned as a `Decimal`.
+
+Formatting logic such as:
+
+```python
+f"edition-{edition_number:03d}"
+```
+
+requires a normal integer.
+
+### Solution
+
+The edition number is converted to a Python integer before arithmetic and formatting.
+
+---
+
+## 4. API Gateway Stage Prefix
+
+Lambda console tests used paths like:
+
+```text
+/latest
+```
+
+However, production API Gateway requests reached Lambda as:
+
+```text
+/prod/latest
+```
+
+This caused:
+
+```text
+404 No route found for '/prod/latest'
+```
+
+### Solution
+
+The API Gateway stage prefix is normalized before route dispatch.
+
+```text
+/prod/latest
+        ↓
+/latest
+```
+
+The same applies to:
+
+```text
+/prod/editions
+        ↓
+/editions
+
+/prod/generate
+        ↓
+/generate
+```
+
+---
+
+## 5. CORS Issues
+
+The frontend initially could not communicate with the API.
+
+### Solution
+
+CORS headers were added to all responses.
+
+```text
+Access-Control-Allow-Origin: *
+
+Access-Control-Allow-Headers:
+Content-Type
+
+Access-Control-Allow-Methods:
+GET,POST,OPTIONS
+```
+
+The Lambda also handles:
+
+```http
+OPTIONS
+```
+
+requests directly.
+
+---
+
+## 6. Bedrock Model Access
+
+An Anthropic Claude model configuration caused an error requiring AWS Marketplace permissions.
+
+```text
+aws-marketplace:ViewSubscriptions
+aws-marketplace:Subscribe
+```
+
+### Solution
+
+The project was switched back to the Amazon Nova Lite inference profile that had previously worked successfully.
+
+The project now uses:
+
+```text
+Amazon Bedrock
+        ↓
+Amazon Nova Lite
+        ↓
+Inference Profile
+```
+
+This avoids requiring additional AWS Marketplace permissions for the configured model access path.
+
+---
+
+## 7. Amazon Nova Lite On-Demand Throughput
+
+Direct model invocation previously produced:
+
+```text
+Invocation of model ID amazon.nova-lite-v1:0
+with on-demand throughput isn't supported
+```
+
+### Solution
+
+The model is invoked using the appropriate inference profile rather than the direct base model ID.
+
+---
+
+# 📁 Project Structure
+
+```text
+FutureNews-AI/
+│
+├── frontend/
 │   │
-│   └── requirements.txt
-│
-├── frontend
-│   ├── src
-│   │   ├── components
-│   │   ├── hooks
-│   │   ├── services
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Header.jsx
+│   │   │   ├── LatestEdition.jsx
+│   │   │   ├── AgentWorkflow.jsx
+│   │   │   ├── FutureTimeline.jsx
+│   │   │   ├── EditionArchive.jsx
+│   │   │   ├── EditionModal.jsx
+│   │   │   ├── GenerateButton.jsx
+│   │   │   ├── TechnologyStack.jsx
+│   │   │   └── Footer.jsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useFutureNews.js
+│   │   │
+│   │   ├── services/
+│   │   │   └── futureNewsApi.js
+│   │   │
 │   │   ├── App.jsx
 │   │   └── index.css
 │   │
 │   └── .env
+│
+├── backend/
+│   │
+│   ├── src/
+│   │   │
+│   │   ├── agent/
+│   │   │   ├── generator.py
+│   │   │   ├── reviewer.py
+│   │   │   ├── memory.py
+│   │   │   └── future_news_agent.py
+│   │   │
+│   │   ├── services/
+│   │   │   ├── dynamodb_service.py
+│   │   │   └── bedrock_service.py
+│   │   │
+│   │   ├── utils/
+│   │   │   └── helpers.py
+│   │   │
+│   │   ├── prompts/
+│   │   │
+│   │   └── handler.py
+│   │
+│   └── lambda_package/
+│       └── agent.zip
 │
 └── README.md
 ```
 
 ---
 
-## 🚀 Running the Frontend Locally
+# ⚙️ Local Development
 
-Clone the repository:
+## Clone the Repository
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/FutureNews-AI.git
+
+cd FutureNews-AI
 ```
+
+---
+
+## Frontend Setup
 
 Navigate to the frontend:
 
 ```bash
-cd FutureNews-AI/frontend
+cd frontend
 ```
 
 Install dependencies:
@@ -386,10 +860,10 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file:
+Create the environment file:
 
-```
-VITE_API_BASE_URL=YOUR_API_GATEWAY_URL
+```env
+VITE_API_BASE_URL=https://YOUR_API_GATEWAY_URL/prod
 ```
 
 Run the development server:
@@ -398,7 +872,9 @@ Run the development server:
 npm run dev
 ```
 
-Build for production:
+---
+
+## Build the Frontend
 
 ```bash
 npm run build
@@ -406,77 +882,153 @@ npm run build
 
 ---
 
-## ⚠️ Known Issues
+# 🔐 IAM Permissions
 
-**Read endpoints currently mutate data.** `GET /latest`, `GET /editions`, and
-`GET /editions/{id}` are meant to be read-only, but every call to them currently runs the
-full generation pipeline and stores a **new** edition in DynamoDB — the same behavior as
-`GET /generate`. This was confirmed by calling `/latest` twice in a row: the returned
-`editionId` incremented both times, and the response was wrapped in
-`{"message": "FutureNews edition generated successfully.", "edition": {...}, ...}`, which
-only the generate path should return.
+The Lambda execution role requires permissions for the AWS services used by the application.
 
-**Root cause (from [`backend/src/handler.py`](backend/src/handler.py)):** there is a
-single `lambda_handler` with no branching on HTTP method or path — it unconditionally
-runs load-memory → run-agent → create-edition → save-to-DynamoDB on every invocation.
-[`backend/src/services/dynamodb_service.py`](backend/src/services/dynamodb_service.py)
-already has a read-only `get_all_editions()` helper, but there's no `get_latest_edition()`
-or `get_edition_by_id()`, and nothing routes the read paths to read-only logic — all four
-API Gateway routes appear to point at this same Lambda.
+Typical permissions include:
 
-**Fix needed (backend, not the frontend in this repo):**
-1. Add read-only handling — either branching in `lambda_handler` on the route/method, or a
-   separate Lambda — that for `/latest`, `/editions`, `/editions/{id}` only reads from
-   DynamoDB via `get_all_editions()` plus new `get_latest_edition()` and
-   `get_edition_by_id(edition_id)` helpers.
-2. Wire those three routes in API Gateway to the read-only logic, leaving `GET /generate`
-   as the only route that runs the existing generation pipeline.
+```text
+DynamoDB
+    ├── GetItem
+    ├── PutItem
+    ├── UpdateItem
+    ├── Scan
+    └── Query
 
-Until fixed, avoid loading the frontend against the live API more than necessary — every
-page load currently generates and stores a new fictional edition.
+Amazon Bedrock
+    └── bedrock:InvokeModel
+```
+
+Depending on the implementation and Bedrock API configuration, Converse/inference-profile access must also be permitted.
 
 ---
 
-## 🔮 Future Improvements
+# 🧠 Key Design Principle
+
+FutureNews AI follows one important rule:
+
+> **Reading the future should never create the future.**
+
+Therefore:
+
+```text
+GET /latest
+GET /editions
+GET /editions/{id}
+```
+
+are strictly read-only.
+
+Only:
+
+```text
+/generate
+```
+
+is allowed to invoke the AI generation pipeline.
+
+---
+
+# 🔮 Future Improvements
 
 Possible future enhancements include:
 
-- Multiple fictional worlds
-- AI-generated newspaper images
-- Multiple independent storylines
-- Character and organization memory
-- Event relationship graphs
-- Storyline branching
-- Human editorial controls
-- Automatic daily generation
-- Email delivery of new editions
-- Personalized future newspapers
+- [ ] Scheduled automatic generation with configurable frequency
+- [ ] Multiple fictional worlds
+- [ ] Different AI agents for politics, technology, economy, and science
+- [ ] Multi-agent debate before publishing an edition
+- [ ] Edition search and filtering
+- [ ] Interactive world map
+- [ ] Storyline visualization
+- [ ] AI-generated newspaper images
+- [ ] User voting on possible future developments
+- [ ] WebSocket live generation updates
+- [ ] CloudWatch dashboards and monitoring
+- [ ] Cost monitoring and Bedrock usage tracking
+- [ ] Authentication for generation controls
+- [ ] Rate limiting for public API access
 
 ---
 
-## 📚 What I Learned
+# 🎯 What Makes FutureNews AI Different?
 
-Building FutureNews AI was an exploration of what makes an AI system behave more like an agent rather than a simple text generator.
+Most AI content generators work like this:
 
-Key learnings include:
+```text
+User Prompt
+    ↓
+AI
+    ↓
+Generated Content
+```
 
-- Designing autonomous AI workflows
-- Using Amazon EventBridge Scheduler for autonomous execution
-- Building serverless applications with AWS Lambda
-- Integrating generative AI with Amazon Bedrock
-- Designing persistent memory using Amazon DynamoDB
-- Creating self-review and revision loops
-- Connecting serverless backends through Amazon API Gateway
-- Building and deploying React applications
-- Designing AI systems where previous outputs influence future decisions
+FutureNews AI works differently:
 
-The biggest lesson was that memory changes the nature of an AI application.
+```text
+Persistent World
+        ↓
+Previous Events
+        ↓
+World Memory
+        ↓
+AI Reasoning
+        ↓
+Generate Next Event
+        ↓
+AI Self Review
+        ↓
+Save Memory
+        ↓
+Repeat
+```
 
-Instead of generating isolated responses, FutureNews AI allows previous events to influence what happens next.
-
-The result is an evolving fictional world.
+The application creates an evolving fictional universe rather than isolated AI-generated articles.
 
 ---
 
-**FutureNews AI** — *An autonomous newspaper from the future.*
-Built with AWS + Amazon Bedrock.
+# 🏗️ Built With
+
+- ☁️ AWS
+- 🤖 Amazon Bedrock
+- 🧠 Amazon Nova Lite
+- ⚡ AWS Lambda
+- 🗄️ Amazon DynamoDB
+- 🌐 Amazon API Gateway
+- ⏰ Amazon EventBridge Scheduler
+- 🚀 AWS Amplify
+- ⚛️ React
+- ⚡ Vite
+- 🐍 Python
+
+---
+
+# 👨‍💻 Author
+
+**Devanand Jayaraman**
+
+AI/ML Engineer | AWS | Generative AI | Agentic AI
+
+---
+
+# ⭐ Final Note
+
+FutureNews AI is an experiment in autonomous storytelling.
+
+It explores a simple question:
+
+> **What if an AI could remember an entire fictional world and continuously write its future?**
+
+Every edition becomes history.
+
+Every new event changes the world.
+
+And the next headline has not happened yet.
+
+---
+
+## 📰 FUTURENEWS AI
+
+### *Tomorrow's headlines, written before they happen.*
+
+**Built with AWS + Amazon Bedrock**
