@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
+
 const NAV_LINKS = [
   { id: 'latest-edition', label: 'Latest Edition' },
+  { id: 'agent', label: 'How It Works' },
   { id: 'timeline', label: 'Timeline' },
   { id: 'archive', label: 'Archive' },
-  { id: 'about', label: 'About the Agent' },
+  { id: 'about', label: 'The Agent' },
 ];
 
 function scrollToSection(id) {
@@ -10,16 +13,46 @@ function scrollToSection(id) {
 }
 
 export default function Header() {
+  const [activeId, setActiveId] = useState(NAV_LINKS[0].id);
+
+  useEffect(() => {
+    const sections = NAV_LINKS
+      .map((link) => document.getElementById(link.id))
+      .filter(Boolean);
+    if (sections.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActiveId(visible[0].target.id);
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5, 1] }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <header className="site-header">
       <div className="container">
-        <div className="brand">
+        <button
+          type="button"
+          className="brand"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
           FUTURE<span>NEWS</span> AI
-        </div>
+        </button>
         <ul className="site-nav">
           {NAV_LINKS.map((link) => (
             <li key={link.id}>
-              <button type="button" onClick={() => scrollToSection(link.id)}>
+              <button
+                type="button"
+                className={activeId === link.id ? 'active' : ''}
+                onClick={() => scrollToSection(link.id)}
+              >
                 {link.label}
               </button>
             </li>

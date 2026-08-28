@@ -45,10 +45,19 @@ export default function LatestEdition({ edition, loading, error, onRetry }) {
 
   return (
     <div className="newspaper fade-up">
+      <div className="masthead">
+        <span className="masthead-rule" />
+        <span className="masthead-name">The FutureNews Herald</span>
+        <span className="masthead-rule" />
+      </div>
+      <div className="dateline">
+        <span>Vol. I</span>
+        <span>Dispatched from {formatDate(edition.futureDate)}</span>
+        <span>Edition No. {edition.editionNumber}</span>
+      </div>
       <div className="edition-meta">
-        <span>Edition {edition.editionNumber}</span>
-        <span>{formatDate(edition.futureDate)}</span>
         {edition.category && <span className="tag">{edition.category}</span>}
+        <span>Filed by the FutureNews AI agent</span>
       </div>
       <h1 className="headline">{edition.headline}</h1>
       {edition.breakingSummary && (
