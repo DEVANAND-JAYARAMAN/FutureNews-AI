@@ -27,24 +27,28 @@ The result is an evolving fictional timeline where one event influences the next
                                    ▼
                         ┌─────────────────────┐
                         │  Amazon API Gateway │
-                        │     REST API        │
+                        │  HTTP API (stage:   │
+                        │  prod)              │
                         └──────────┬──────────┘
                                    │
                                    ▼
                         ┌─────────────────────┐
                         │    AWS Lambda       │
                         │  FutureNews Agent   │
+                        │  (Python, ap-south-1)│
                         └──────────┬──────────┘
                                    │
                   ┌────────────────┼────────────────┐
                   │                │                │
                   ▼                ▼                ▼
-        ┌─────────────────┐ ┌──────────────┐ ┌─────────────────┐
-        │ Amazon DynamoDB │ │ Amazon       │ │ Amazon          │
-        │ World Memory    │ │ Bedrock      │ │ EventBridge     │
-        │ Editions        │ │ Nova Lite    │ │ Scheduler       │
-        └─────────────────┘ └──────────────┘ └─────────────────┘
+        ┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐
+        │ Amazon DynamoDB │ │ Amazon Bedrock   │ │ Amazon          │
+        │ FutureNewsWorld │ │ Claude Sonnet 4.5│ │ EventBridge     │
+        │ State + Editions│ │ (global profile) │ │ Scheduler       │
+        └─────────────────┘ └──────────────────┘ └─────────────────┘
 ```
+
+> 📄 Full service inventory with exact resource names: [`docs/AWS_SERVICES.md`](docs/AWS_SERVICES.md)
 
 ---
 
@@ -74,10 +78,10 @@ Load World Memory
 Generate Next Future Event
         │
         ▼
-Amazon Bedrock
+Amazon Bedrock (Converse API)
         │
         ▼
-Amazon Nova Lite
+Claude Sonnet 4.5 (global inference profile)
         │
         ▼
 AI Self Review
@@ -180,12 +184,12 @@ This allows the fictional world to evolve instead of generating unrelated news a
 ## AI
 
 - Amazon Bedrock
-- Amazon Nova Lite
 - Bedrock Converse API
+- Claude Sonnet 4.5 (`global.anthropic.claude-sonnet-4-5-20250929-v1:0` inference profile)
 
 ## Database
 
-- Amazon DynamoDB
+- Amazon DynamoDB (`FutureNewsEditions`, `FutureNewsWorldState`)
 
 ## Automation
 
@@ -195,17 +199,22 @@ This allows the fictional world to evolve instead of generating unrelated news a
 
 # ☁️ AWS Services Used
 
-| AWS Service | Purpose |
-|---|---|
-| AWS Amplify | Hosts and deploys the React frontend |
-| Amazon API Gateway | Exposes the FutureNews REST API |
-| AWS Lambda | Runs the FutureNews AI agent |
-| Amazon Bedrock | Provides generative AI capabilities |
-| Amazon Nova Lite | Generates future events and articles |
-| Amazon DynamoDB | Stores editions and persistent world memory |
-| Amazon EventBridge Scheduler | Triggers autonomous agent execution |
-| AWS IAM | Manages permissions between AWS services |
-| Amazon CloudWatch | Lambda monitoring and logs |
+All backend resources run in **`ap-south-1`** (Mumbai).
+
+| AWS Service | Resource name / identifier | Purpose |
+|---|---|---|
+| AWS Amplify Hosting | Frontend app (build of `frontend/`) | Builds and hosts the React + Vite frontend from GitHub |
+| Amazon API Gateway | HTTP API, stage `prod` | Exposes the FutureNews HTTP API in front of Lambda |
+| AWS Lambda | `handler.lambda_handler` (`agent.zip`) | Runs the API router and the FutureNews AI agent |
+| Amazon Bedrock | `bedrock-runtime` · `Converse` API | Provides generative AI capabilities |
+| Claude Sonnet 4.5 | `global.anthropic.claude-sonnet-4-5-20250929-v1:0` | Generates future events, self-review, revisions, and articles |
+| Amazon DynamoDB | `FutureNewsEditions` (PK `editionId`) | Stores every generated edition |
+| Amazon DynamoDB | `FutureNewsWorldState` (PK `worldId`, item `world-main`) | Persistent world memory |
+| Amazon EventBridge Scheduler | Recurring schedule → Lambda `/generate` | Triggers autonomous agent execution |
+| AWS IAM | Lambda execution role | DynamoDB + Bedrock `InvokeModel`/`Converse` permissions |
+| Amazon CloudWatch Logs | `/aws/lambda/<function>` | Lambda monitoring and logs |
+
+See [`docs/AWS_SERVICES.md`](docs/AWS_SERVICES.md) for the code references behind each entry.
 
 ---
 
@@ -310,6 +319,65 @@ The read-only endpoints:
 ```
 
 only interact with DynamoDB.
+
+---
+
+# 🔁 End-to-End Flow
+
+## Read path — `GET /latest`, `/editions`, `/editions/{id}`
+
+```text
+Browser (Amplify-hosted React app)
+   │  fetch(`${VITE_API_BASE_URL}${path}`)
+   ▼
+Amazon API Gateway  (HTTP API, stage: prod)
+   │  event.requestContext.http.path = "/prod/latest"
+   ▼
+AWS Lambda  handler.lambda_handler
+   │  strip "/prod" prefix  →  "/latest"
+   │  route dispatch (no Bedrock)
+   ▼
+Amazon DynamoDB
+   ├── FutureNewsEditions   (get_item / scan)
+   └── FutureNewsWorldState (get_item)
+   │
+   ▼
+Decimal → int/float normalization  (helpers.convert_decimals / decimal_serializer)
+   │
+   ▼
+JSON response + CORS headers  →  API Gateway  →  Browser
+```
+
+## Generate path — `GET /generate` (also the EventBridge Scheduler target)
+
+```text
+Amazon EventBridge Scheduler  ──(recurring)──┐
+                                             │
+Browser "Generate Next Future" button ───────┤
+                                             ▼
+API Gateway (prod)  →  AWS Lambda  generate_future_news()
+   │
+   1. get_world_state("world-main")          ← DynamoDB FutureNewsWorldState
+   2. get_all_editions()                     ← DynamoDB FutureNewsEditions (scan)
+   3. run_future_news_agent(world, editions)
+        ├── build memory context (recent 5 editions + world state)
+        ├── generate event      → Bedrock Converse (Claude Sonnet 4.5, temp 0.8)
+        ├── validate event date (deterministic, no model call)
+        ├── AI self-review      → Bedrock Converse (temp 0.3)
+        ├── revise if score < 7 / not approved / bad date
+        │       → Bedrock Converse (temp 0.6) + re-review
+        └── write article       → Bedrock Converse (max_tokens 2000, temp 0.7)
+   4. create_edition(...)  →  edition-00N
+   5. update_world_memory(...)  (new facts, storylines, date, edition count)
+   6. save_edition()          → DynamoDB FutureNewsEditions (put_item)
+      update_world_state()     → DynamoDB FutureNewsWorldState (put_item)
+   │
+   ▼
+JSON { edition, agentReview, dateValidation, wasRevised } + CORS  →  Browser
+```
+
+Every Bedrock call goes through the `global.anthropic.claude-sonnet-4-5-20250929-v1:0`
+inference profile in `ap-south-1`. Lambda logs land in CloudWatch Logs.
 
 ---
 
@@ -735,43 +803,39 @@ requests directly.
 
 ## 6. Bedrock Model Access
 
-An Anthropic Claude model configuration caused an error requiring AWS Marketplace permissions.
-
-```text
-aws-marketplace:ViewSubscriptions
-aws-marketplace:Subscribe
-```
+Early configurations hit errors around model access and, for some model IDs, AWS
+Marketplace permissions (`aws-marketplace:ViewSubscriptions` / `Subscribe`).
 
 ### Solution
 
-The project was switched back to the Amazon Nova Lite inference profile that had previously worked successfully.
-
-The project now uses:
+The project settled on **Claude Sonnet 4.5** accessed through the **global
+cross-region inference profile**:
 
 ```text
 Amazon Bedrock
         ↓
-Amazon Nova Lite
+Claude Sonnet 4.5
         ↓
-Inference Profile
+global.anthropic.claude-sonnet-4-5-20250929-v1:0
 ```
 
-This avoids requiring additional AWS Marketplace permissions for the configured model access path.
+Model access is granted in the Bedrock console for the `ap-south-1` region.
 
 ---
 
-## 7. Amazon Nova Lite On-Demand Throughput
+## 7. On-Demand Throughput Not Supported
 
-Direct model invocation previously produced:
+Invoking a base model ID directly can produce:
 
 ```text
-Invocation of model ID amazon.nova-lite-v1:0
+Invocation of model ID <base-model-id>
 with on-demand throughput isn't supported
 ```
 
 ### Solution
 
-The model is invoked using the appropriate inference profile rather than the direct base model ID.
+The model is always invoked through the `global.` inference profile ID rather than
+the direct base model ID (`backend/src/services/bedrock_service.py`).
 
 ---
 
@@ -989,12 +1053,12 @@ The application creates an evolving fictional universe rather than isolated AI-g
 
 # 🏗️ Built With
 
-- ☁️ AWS
-- 🤖 Amazon Bedrock
-- 🧠 Amazon Nova Lite
-- ⚡ AWS Lambda
+- ☁️ AWS (`ap-south-1`)
+- 🤖 Amazon Bedrock (Converse API)
+- 🧠 Claude Sonnet 4.5 (global inference profile)
+- ⚡ AWS Lambda (Python)
 - 🗄️ Amazon DynamoDB
-- 🌐 Amazon API Gateway
+- 🌐 Amazon API Gateway (HTTP API)
 - ⏰ Amazon EventBridge Scheduler
 - 🚀 AWS Amplify
 - ⚛️ React
