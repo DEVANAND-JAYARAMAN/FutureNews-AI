@@ -1,3 +1,5 @@
+import { useMemo, useState } from 'react';
+
 function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -20,6 +22,19 @@ function LoadingState() {
 }
 
 export default function EditionArchive({ editions, loading, error, onRetry, onSelect }) {
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const categories = useMemo(() => {
+    const set = new Set();
+    editions.forEach((e) => e.category && set.add(e.category));
+    return ['All', ...[...set].sort()];
+  }, [editions]);
+
+  const visibleEditions =
+    activeCategory === 'All'
+      ? editions
+      : editions.filter((e) => e.category === activeCategory);
+
   return (
     <section id="archive" className="section container">
       <div className="section-head">
@@ -27,6 +42,21 @@ export default function EditionArchive({ editions, loading, error, onRetry, onSe
         <h2>Edition Archive</h2>
         <p>Browse every edition FutureNews AI has published from the future.</p>
       </div>
+
+      {!loading && !error && editions.length > 0 && categories.length > 2 && (
+        <div className="filter-chips">
+          {categories.map((cat) => (
+            <button
+              type="button"
+              key={cat}
+              className={`filter-chip ${activeCategory === cat ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading && <LoadingState />}
 
@@ -47,7 +77,7 @@ export default function EditionArchive({ editions, loading, error, onRetry, onSe
 
       {!loading && !error && editions.length > 0 && (
         <div className="archive-grid">
-          {editions.map((edition) => (
+          {visibleEditions.map((edition) => (
             <div
               className="archive-card"
               key={edition.editionId}

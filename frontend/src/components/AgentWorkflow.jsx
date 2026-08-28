@@ -2,7 +2,7 @@ const STEPS = [
   { label: 'EventBridge Scheduler', desc: 'Wakes the agent on a recurring schedule' },
   { label: 'FutureNews AI Agent', desc: 'AWS Lambda function starts a new run' },
   { label: 'Load World Memory', desc: 'Reads persistent world state and past editions from DynamoDB' },
-  { label: 'Amazon Bedrock', desc: 'Generates the next plausible future event' },
+  { label: 'Amazon Bedrock', desc: 'Claude Sonnet 4.5 generates the next plausible future event' },
   { label: 'Generate Future Event', desc: 'Drafts headline, article, and consequences' },
   { label: 'Self Review', desc: 'Reviews and revises the draft for consistency' },
   { label: 'Save to DynamoDB', desc: 'Persists the new edition and updated world memory' },

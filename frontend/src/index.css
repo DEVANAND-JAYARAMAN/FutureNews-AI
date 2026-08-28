@@ -769,6 +769,182 @@ button {
   text-transform: uppercase;
 }
 
+/* ---------------- Hero stats ---------------- */
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2.6rem;
+}
+
+.hero-stat {
+  min-width: 150px;
+  padding: 1rem 1.4rem;
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(20, 27, 48, 0.55), rgba(13, 18, 32, 0.55));
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ---------------- Category filter chips ---------------- */
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-bottom: 2.2rem;
+}
+
+.filter-chip {
+  background: none;
+  border: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--border-glow);
+  color: var(--cyan);
+}
+
+.filter-chip.active {
+  background: rgba(62, 232, 255, 0.14);
+  border-color: var(--border-glow);
+  color: var(--cyan);
+}
+
+/* ---------------- Agent self-review card ---------------- */
+
+.agent-review {
+  margin-top: 2rem;
+  text-align: left;
+  border: 1px solid var(--border-glow);
+  border-radius: 14px;
+  padding: 1.6rem;
+  background: linear-gradient(180deg, rgba(62, 232, 255, 0.05), rgba(13, 18, 32, 0.4));
+}
+
+.agent-review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+}
+
+.agent-review-edition {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.agent-review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+}
+
+.agent-review-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.agent-review-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.agent-review-value {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.agent-review-max {
+  font-size: 0.9rem;
+  color: var(--text-faint);
+}
+
+.agent-review-badge {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-dim);
+}
+
+.agent-review-badge.ok {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.agent-review-badge.warn {
+  color: var(--amber);
+  border-color: rgba(242, 184, 85, 0.4);
+  background: rgba(242, 184, 85, 0.08);
+}
+
+.agent-review-feedback {
+  margin: 1.2rem 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.agent-review-issues {
+  margin: 0.9rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.agent-review-issues li {
+  margin-bottom: 0.3rem;
+}
+
 @media (max-width: 640px) {
   .section {
     padding: 3.6rem 0;
@@ -780,5 +956,10 @@ button {
 
   .site-nav li:nth-child(n) button {
     font-size: 0.78rem;
+  }
+
+  .hero-stat {
+    min-width: 120px;
+    flex: 1;
   }
 }

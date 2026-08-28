@@ -46,8 +46,9 @@ bedrock_runtime.converse(modelId=MODEL_ID, messages=[...], inferenceConfig={...}
   - event revision (`future_news_agent.py`, temp `0.6`)
   - article writing (`future_news_agent.py`, `max_tokens=2000`, temp `0.7`)
 
-> Note: the `README.md` architecture diagram still labels this "Amazon Nova Lite" —
-> the code has since moved to Claude Sonnet 4.5 via the global inference profile.
+> Note: earlier drafts of this project used Amazon Nova Lite; the agent has since
+> moved to Claude Sonnet 4.5 via the global inference profile, and the `README.md`
+> now reflects that everywhere.
 
 ### 2 & 3. Amazon DynamoDB — `backend/src/services/dynamodb_service.py`
 

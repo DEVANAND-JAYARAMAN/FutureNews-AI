@@ -20,6 +20,7 @@ function App() {
     editionsError,
     generating,
     generateError,
+    lastRun,
     reloadLatest,
     reloadEditions,
     generate,
@@ -40,7 +41,7 @@ function App() {
   return (
     <>
       <Header />
-      <Hero />
+      <Hero latest={latest} editionCount={editions.length} loading={latestLoading} />
 
       <section id="latest-edition" className="section container">
         <div className="section-head">
@@ -80,6 +81,7 @@ function App() {
           onGenerate={handleGenerate}
           error={generateError}
           success={generateSuccess}
+          lastRun={lastRun}
         />
       </section>
 

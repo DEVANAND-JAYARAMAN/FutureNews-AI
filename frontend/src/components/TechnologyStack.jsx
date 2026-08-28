@@ -1,7 +1,8 @@
 const TECHNOLOGIES = [
   { name: 'Amazon EventBridge Scheduler', role: 'Wakes the agent on a recurring schedule' },
   { name: 'AWS Lambda', role: 'Runs the autonomous agent logic' },
-  { name: 'Amazon Bedrock', role: 'Generates future events and articles' },
+  { name: 'Amazon Bedrock (Converse API)', role: 'Generates future events, self-review, and articles' },
+  { name: 'Claude Sonnet 4.5', role: 'The reasoning model behind every edition, via the global inference profile' },
   { name: 'Amazon DynamoDB', role: 'Stores persistent world memory and editions' },
   { name: 'Amazon API Gateway', role: 'Exposes the public REST API' },
   { name: 'AWS Amplify', role: 'Hosts and deploys the frontend' },

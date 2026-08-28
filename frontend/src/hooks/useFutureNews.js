@@ -23,6 +23,7 @@ export function useFutureNews() {
   const [editionsError, setEditionsError] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState(null);
+  const [lastRun, setLastRun] = useState(null);
 
   const loadLatest = useCallback(async () => {
     setLatestLoading(true);
@@ -59,7 +60,8 @@ export function useFutureNews() {
     setGenerating(true);
     setGenerateError(null);
     try {
-      await generateNextEdition();
+      const run = await generateNextEdition();
+      setLastRun(run);
       await Promise.all([loadLatest(), loadEditions()]);
       return true;
     } catch (err) {
@@ -79,6 +81,7 @@ export function useFutureNews() {
     editionsError,
     generating,
     generateError,
+    lastRun,
     reloadLatest: loadLatest,
     reloadEditions: loadEditions,
     generate,

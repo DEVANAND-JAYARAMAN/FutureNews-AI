@@ -108,6 +108,28 @@ export async function getEditionById(editionId) {
   return normalizeEdition(raw);
 }
 
-export function generateNextEdition() {
-  return request('/generate');
+export async function generateNextEdition() {
+  const raw = await request('/generate');
+
+  const review = raw?.agentReview ?? raw?.review ?? null;
+  const dateValidation = raw?.dateValidation ?? null;
+
+  return {
+    edition: normalizeEdition(raw),
+    review: review
+      ? {
+          approved: Boolean(review.approved),
+          score: Number(review.score) || 0,
+          issues: Array.isArray(review.issues) ? review.issues : [],
+          feedback: review.feedback ?? '',
+        }
+      : null,
+    dateValidation: dateValidation
+      ? {
+          valid: Boolean(dateValidation.valid),
+          issue: dateValidation.issue ?? null,
+        }
+      : null,
+    wasRevised: Boolean(raw?.wasRevised),
+  };
 }

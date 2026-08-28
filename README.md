@@ -427,7 +427,7 @@ The agent loads:
 
 ### 2. Generate a Future Event
 
-Amazon Nova Lite generates a new event based on the existing fictional world.
+Claude Sonnet 4.5 (via the Amazon Bedrock Converse API) generates a new event based on the existing fictional world.
 
 The event includes:
 
@@ -991,6 +991,30 @@ Only:
 ```
 
 is allowed to invoke the AI generation pipeline.
+
+---
+
+# 🌤️ Part of the AWS Summer Build Series
+
+FutureNews AI is my season-finale entry for the **AWS Builder Center Summer Build
+Series** (June–August 2026). The summer moved through three stages — ship an idea
+from the Wishlist, build a creative app, then build an agent that runs on its own —
+and this project is where those threads come together:
+
+| Summer theme | How FutureNews AI expresses it |
+|---|---|
+| A creative app | An AI newspaper that writes fictional headlines from the future |
+| An autonomous agent | EventBridge Scheduler wakes a Lambda agent with no human trigger |
+| A finishing touch | The agent's self-review (score, verdict, revision pass, timeline check) is now surfaced in the UI after each generation |
+
+**What I learned across the summer:**
+
+- Inference profiles matter — base model IDs fail with on-demand throughput; the
+  `global.` Claude Sonnet 4.5 profile is what actually works in `ap-south-1`.
+- "Reading the future should never create the future" — separating read-only
+  routes from the single generation route kept costs and side effects predictable.
+- Persistent memory is what turns a content generator into an agent: every edition
+  is written from the full history of prior editions and world state.
 
 ---
 
